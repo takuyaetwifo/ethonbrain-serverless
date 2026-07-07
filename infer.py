@@ -12,8 +12,14 @@ _BASE = os.path.dirname(os.path.abspath(__file__))
 _LOCK = threading.Lock()
 _S = {}
 _DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+# TF32(精度を落とした高速matmul)がAmpere以降のGPUで既定ON。今回のような小型モデルでは
+# 累積誤差でsoftmaxの上位トークンが入れ替わり、CPU(numpy/fp32)と全く違う(話題ごとずれた)
+# 回答になる不具合が発生した(2026-07-08確認: 同じ重み・同じコードでCPUは正答、GPUは支離滅裂)。
+# 常にフルfp32精度で計算させ、CPU版と数学的に一致させる。
+torch.backends.cuda.matmul.allow_tf32 = False
+torch.backends.cudnn.allow_tf32 = False
 
-_RE = re.compile(r"[぀-ゟー]+|[゠-・ヽ-ヿ]+|[一-鿿々]+|.", re.DOTALL)
+_RE = re.compile(r"[぀-ゟー]+|[゠-・ヽ-ヿ]+|[一-鿿々]+|[A-Za-z0-9_]+|.", re.DOTALL)
 
 
 def available():
