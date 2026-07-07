@@ -4,7 +4,7 @@ FROM pytorch/pytorch:2.12.1-cuda12.6-cudnn9-runtime
 
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --break-system-packages -r requirements.txt
 
 COPY infer.py handler.py ./
 
