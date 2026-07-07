@@ -55,6 +55,13 @@ def handler(event):
     except (TypeError, ValueError):
         temp = 0.6
     mode = (inp.get("mode") or "chat").lower()
+    if mode == "echo":
+        # 診断用(2026-07-08): 実際にRunPod経由で届く質問文字列がどう見えるか確認する。
+        import infer as _dbg
+        _dbg._load()
+        ids = _dbg._encode(_dbg._load(), f"問「{q}」\n答「")
+        return {"received_question": q, "len": len(q), "codepoints": [hex(ord(c)) for c in q],
+                "encoded_ids": ids, "decoded_back": "".join(_dbg._load()["itos"].get(i, "?") for i in ids)}
     import infer
     try:
         if mode in ("continue", "generate"):
